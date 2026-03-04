@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sliding Puzzle — 10×10</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #1a1a2e;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #eee;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: #e94560;
+    }
+
+    #info {
+      display: flex;
+      gap: 40px;
+    }
+
+    .stat label {
+      color: #aaa;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+      text-align: center;
+    }
+
+    .stat span {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #e94560;
+      text-align: center;
+    }
+
+    #board-wrap {
+      position: relative;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(10, 56px);
+      grid-template-rows: repeat(10, 56px);
+      gap: 3px;
+      background: #16213e;
+      padding: 6px;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(233,69,96,0.3);
+      user-select: none;
+    }
+
+    .tile {
+      width: 56px;
+      height: 56px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      background: linear-gradient(135deg, #0f3460, #1a4a80);
+      color: #cce;
+      border: 1px solid #2a5a90;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .tile:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 10px rgba(233,69,96,0.5);
+    }
+
+    .tile.empty {
+      background: transparent;
+      border: 1px dashed #2a3a5a;
+      cursor: default;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    .tile.movable {
+      background: linear-gradient(135deg, #16405a, #1e6080);
+      border-color: #3a9abf;
+      color: #aef;
+      box-shadow: 0 0 6px rgba(100,200,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    #controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+
+    button:active { transform: translateY(0); }
+
+    #btn-shuffle { background: #e94560; color: #fff; }
+    #btn-solve   { background: #0f3460; color: #aef; border: 1px solid #3a9abf; }
+
+    #message {
+      font-size: 1.1rem;
+      font-weight: bold;
+      min-height: 1.5rem;
+      letter-spacing: 1px;
+      color: #aaa;
+    }
+
+    #overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(26,26,46,0.88);
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #4caf50;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+    #overlay.show { display: flex; }
+    #overlay .sub { font-size: 1rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<h1>SLIDING PUZZLE</h1>
+
+<div id="info">
+  <div class="stat">
+    <label>Moves</label>
+    <span id="move-count">0</span>
+  </div>
+  <div class="stat">
+    <label>Time</label>
+    <span id="timer">0:00</span>
+  </div>
+</div>
+
+<div id="board-wrap">
+  <div id="board"></div>
+  <div id="overlay">
+    <div>Puzzle Solved!</div>
+    <div class="sub" id="solve-stats"></div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btn-shuffle">Shuffle</button>
+  <button id="btn-solve">Show Solution</button>
+</div>
+
+<div id="message"></div>
+
+<script>
+(() => {
+  const SIZE  = 10;
+  const TOTAL = SIZE * SIZE;
+  const BLANK = TOTAL - 1; // sentinel value for the empty cell
+
+  // Game state
+  let tiles       = [];  // tiles[position] = value (BLANK = empty cell)
+  let moveHistory = [];  // {emptyBefore, tileMoved} for each player move
+  let moves       = 0;
+  let seconds     = 0;
+  let timerHandle = null;
+  let started     = false;
+  let solved      = false;
+  let replaying   = false;
+
+  // DOM
+  const boardEl     = document.getElementById('board');
+  const moveCountEl = document.getElementById('move-count');
+  const timerEl     = document.getElementById('timer');
+  const messageEl   = document.getElementById('message');
+  const overlayEl   = document.getElementById('overlay');
+  const solveStatsEl= document.getElementById('solve-stats');
+
+  // ── Grid helpers ────────────────────────────────────────────────────────
+
+  const row = i => Math.floor(i / SIZE);
+  const col = i => i % SIZE;
+  const idx = (r, c) => r * SIZE + c;
+
+  function emptyPos() { return tiles.indexOf(BLANK); }
+
+  function neighbours(i) {
+    const r = row(i), c = col(i), nb = [];
+    if (r > 0)        nb.push(idx(r-1, c));
+    if (r < SIZE - 1) nb.push(idx(r+1, c));
+    if (c > 0)        nb.push(idx(r, c-1));
+    if (c < SIZE - 1) nb.push(idx(r, c+1));
+    return nb;
+  }
+
+  // ── Solvability check ───────────────────────────────────────────────────
+  // For even-width grids: (inversions + blank row from bottom) must be even.
+  function isSolvable(arr) {
+    const flat = arr.filter(v => v !== BLANK);
+    let inv = 0;
+    for (let i = 0; i < flat.length - 1; i++)
+      for (let j = i + 1; j < flat.length; j++)
+        if (flat[i] > flat[j]) inv++;
+    const blankRowFromBottom = SIZE - row(arr.indexOf(BLANK));
+    return (inv + blankRowFromBottom) % 2 === 0;
+  }
+
+  // ── Shuffle ─────────────────────────────────────────────────────────────
+  function newGame() {
+    replaying = false;
+    stopTimer();
+    overlayEl.classList.remove('show');
+    messageEl.textContent = '';
+    moves = 0; seconds = 0; started = false; solved = false;
+    moveHistory = [];
+    moveCountEl.textContent = '0';
+    timerEl.textContent = '0:00';
+
+    do {
+      tiles = Array.from({length: TOTAL}, (_, i) => i);
+      for (let i = TOTAL - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+      }
+    } while (!isSolvable(tiles) || isGoal());
+
+    render();
+  }
+
+  function isGoal() {
+    return tiles.every((v, i) => v === i);
+  }
+
+  // ── Move a tile ─────────────────────────────────────────────────────────
+  function applyMove(tilePos, record = true) {
+    if (solved || replaying) return false;
+    const empty = emptyPos();
+    if (!neighbours(empty).includes(tilePos)) return false;
+
+    if (!started) { startTimer(); started = true; }
+    if (record) moveHistory.push({emptyBefore: empty, tilePos});
+
+    [tiles[empty], tiles[tilePos]] = [tiles[tilePos], tiles[empty]];
+    moves++;
+    moveCountEl.textContent = moves;
+    render();
+
+    if (isGoal()) onWin();
+    return true;
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────
+  function render() {
+    const movable = new Set(neighbours(emptyPos()));
+    boardEl.innerHTML = '';
+    tiles.forEach((val, pos) => {
+      const div = document.createElement('div');
+      div.className = 'tile' + (val === BLANK ? ' empty' : movable.has(pos) ? ' movable' : '');
+      if (val !== BLANK) {
+        div.textContent = val + 1;
+        div.addEventListener('click', () => applyMove(pos));
+      }
+      boardEl.appendChild(div);
+    });
+  }
+
+  // ── Win ─────────────────────────────────────────────────────────────────
+  function onWin() {
+    stopTimer();
+    solved = true;
+    solveStatsEl.textContent = `${moves} moves · ${fmt(seconds)}`;
+    overlayEl.classList.add('show');
+  }
+
+  // ── Timer ────────────────────────────────────────────────────────────────
+  function startTimer() {
+    timerHandle = setInterval(() => { seconds++; timerEl.textContent = fmt(seconds); }, 1000);
+  }
+  function stopTimer() { clearInterval(timerHandle); timerHandle = null; }
+  function fmt(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+  // ── Show Solution: replay move history in reverse ────────────────────────
+  document.getElementById('btn-solve').addEventListener('click', () => {
+    if (replaying || solved) return;
+    if (moveHistory.length === 0) {
+      messageEl.textContent = 'Make at least one move first.';
+      return;
+    }
+    replaying = true;
+    stopTimer();
+    messageEl.textContent = 'Replaying solution…';
+
+    // Undo each move: slide the tile that was previously the blank back into place
+    const steps = [...moveHistory].reverse().map(h => h.emptyBefore);
+    let i = 0;
+
+    function step() {
+      if (i >= steps.length) {
+        replaying = false;
+        // Reset counters to pre-play state
+        moves = 0; seconds = 0; started = false;
+        moveHistory = [];
+        moveCountEl.textContent = '0';
+        timerEl.textContent = '0:00';
+        messageEl.textContent = 'Board restored to original shuffle.';
+        return;
+      }
+      const dest = steps[i++];
+      const empty = emptyPos();
+      if (neighbours(empty).includes(dest)) {
+        [tiles[empty], tiles[dest]] = [tiles[dest], tiles[empty]];
+        render();
+      }
+      setTimeout(step, 120);
+    }
+    step();
+  });
+
+  // ── Shuffle button ───────────────────────────────────────────────────────
+  document.getElementById('btn-shuffle').addEventListener('click', newGame);
+
+  // ── Keyboard: arrow keys slide the tile on the opposite side of the blank
+  document.addEventListener('keydown', e => {
+    if (solved || replaying) return;
+    const empty = emptyPos();
+    const r = row(empty), c = col(empty);
+    const map = {
+      ArrowUp:    r < SIZE - 1 ? idx(r+1, c) : -1,
+      ArrowDown:  r > 0        ? idx(r-1, c) : -1,
+      ArrowLeft:  c < SIZE - 1 ? idx(r, c+1) : -1,
+      ArrowRight: c > 0        ? idx(r, c-1) : -1,
+    };
+    const target = map[e.key];
+    if (target !== undefined && target !== -1) {
+      e.preventDefault();
+      applyMove(target);
+    }
+  });
+
+  // ── Start ────────────────────────────────────────────────────────────────
+  newGame();
+})();
+</script>
+</body>
+</html>
