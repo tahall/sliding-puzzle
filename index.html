@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sliding Puzzle — 10×10</title>
+  <title>Sliding Puzzle</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,10 +13,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
+      gap: 18px;
       background: #1a1a2e;
       font-family: 'Segoe UI', system-ui, sans-serif;
       color: #eee;
+      padding: 20px;
     }
 
     h1 {
@@ -25,120 +26,102 @@
       color: #e94560;
     }
 
-    #info {
+    /* ── Difficulty selector ─────────────────────────────────── */
+    #difficulty {
       display: flex;
-      gap: 40px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #2a5a90;
     }
+
+    .diff-btn {
+      padding: 7px 16px;
+      background: #0f3460;
+      color: #778;
+      border: none;
+      border-right: 1px solid #2a5a90;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .diff-btn:last-child { border-right: none; }
+    .diff-btn:hover { background: #16405a; color: #cce; }
+    .diff-btn.active { background: #e94560; color: #fff; cursor: default; }
+
+    /* ── Stats ───────────────────────────────────────────────── */
+    #info { display: flex; gap: 40px; }
 
     .stat label {
       color: #aaa;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       display: block;
       text-align: center;
     }
-
     .stat span {
       display: block;
       font-size: 1.4rem;
       font-weight: bold;
       color: #e94560;
       text-align: center;
+      min-width: 3ch;
     }
 
-    #board-wrap {
-      position: relative;
-    }
+    /* ── Board ───────────────────────────────────────────────── */
+    #board-wrap { position: relative; }
 
     #board {
-      display: grid;
-      grid-template-columns: repeat(10, 56px);
-      grid-template-rows: repeat(10, 56px);
-      gap: 3px;
+      position: relative;        /* tiles are absolute inside */
       background: #16213e;
-      padding: 6px;
       border-radius: 8px;
       box-shadow: 0 0 30px rgba(233,69,96,0.3);
-      user-select: none;
+      /* width/height set by JS */
     }
 
+    /* ── Tiles ───────────────────────────────────────────────── */
     .tile {
-      width: 56px;
-      height: 56px;
-      border-radius: 5px;
+      position: absolute;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      border-radius: 5px;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
       background: linear-gradient(135deg, #0f3460, #1a4a80);
       color: #cce;
       border: 1px solid #2a5a90;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+      /* Smooth sliding animation */
+      transition: transform 140ms ease, box-shadow 80ms ease;
+      /* width/height/font-size set by JS */
     }
+
+    /* Suppress animation when initially placing tiles */
+    .tile.no-anim { transition: none !important; }
 
     .tile:hover {
-      transform: scale(1.06);
-      box-shadow: 0 0 10px rgba(233,69,96,0.5);
-    }
-
-    .tile.empty {
-      background: transparent;
-      border: 1px dashed #2a3a5a;
-      cursor: default;
-      box-shadow: none;
-      pointer-events: none;
+      box-shadow: 0 0 10px rgba(233,69,96,0.5),
+                  inset 0 1px 0 rgba(255,255,255,0.1);
+      z-index: 2;
     }
 
     .tile.movable {
       background: linear-gradient(135deg, #16405a, #1e6080);
       border-color: #3a9abf;
       color: #aef;
-      box-shadow: 0 0 6px rgba(100,200,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+      box-shadow: 0 0 6px rgba(100,200,255,0.25),
+                  inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
-    #controls {
-      display: flex;
-      gap: 12px;
-    }
-
-    button {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-    }
-
-    button:active { transform: translateY(0); }
-
-    #btn-shuffle { background: #e94560; color: #fff; }
-    #btn-solve   { background: #0f3460; color: #aef; border: 1px solid #3a9abf; }
-
-    #message {
-      font-size: 1.1rem;
-      font-weight: bold;
-      min-height: 1.5rem;
-      letter-spacing: 1px;
-      color: #aaa;
-    }
-
+    /* ── Overlay ─────────────────────────────────────────────── */
     #overlay {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(26,26,46,0.88);
+      background: rgba(26,26,46,0.9);
       border-radius: 8px;
       align-items: center;
       justify-content: center;
@@ -151,11 +134,49 @@
     }
     #overlay.show { display: flex; }
     #overlay .sub { font-size: 1rem; color: #aaa; }
+
+    /* ── Controls ────────────────────────────────────────────── */
+    #controls { display: flex; gap: 12px; }
+
+    button.ctrl {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button.ctrl:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+    button.ctrl:active { transform: translateY(0); }
+
+    #btn-shuffle { background: #e94560; color: #fff; }
+    #btn-solve   { background: #0f3460; color: #aef; border: 1px solid #3a9abf; }
+
+    #message {
+      font-size: 1rem;
+      font-weight: 600;
+      min-height: 1.4rem;
+      letter-spacing: 0.5px;
+      color: #778;
+    }
   </style>
 </head>
 <body>
 
 <h1>SLIDING PUZZLE</h1>
+
+<div id="difficulty">
+  <button class="diff-btn" data-size="3">3×3</button>
+  <button class="diff-btn" data-size="4">4×4</button>
+  <button class="diff-btn" data-size="6">6×6</button>
+  <button class="diff-btn" data-size="8">8×8</button>
+  <button class="diff-btn active" data-size="10">10×10</button>
+</div>
 
 <div id="info">
   <div class="stat">
@@ -177,68 +198,139 @@
 </div>
 
 <div id="controls">
-  <button id="btn-shuffle">Shuffle</button>
-  <button id="btn-solve">Show Solution</button>
+  <button id="btn-shuffle" class="ctrl">Shuffle</button>
+  <button id="btn-solve" class="ctrl">Show Solution</button>
 </div>
 
 <div id="message"></div>
 
 <script>
 (() => {
-  const SIZE  = 10;
-  const TOTAL = SIZE * SIZE;
-  const BLANK = TOTAL - 1; // sentinel value for the empty cell
+  // ── Layout constants ────────────────────────────────────────
+  const BOARD_TARGET = 560; // desired board pixel size
+  const GAP     = 3;
+  const PADDING = 6;
+  const ANIM_MS = 140;      // tile slide duration (ms)
 
-  // Game state
-  let tiles       = [];  // tiles[position] = value (BLANK = empty cell)
-  let moveHistory = [];  // {emptyBefore, tileMoved} for each player move
+  // ── Game state ──────────────────────────────────────────────
+  let SIZE, BLANK, TILE_SIZE, BOARD_PX, FONT_SIZE;
+  let tiles       = [];  // tiles[pos] = value; BLANK marks the empty cell
+  let tileEls     = new Map(); // value → <div>
+  let moveHistory = [];  // {emptyBefore, tilePos} per player move
   let moves       = 0;
   let seconds     = 0;
   let timerHandle = null;
   let started     = false;
   let solved      = false;
   let replaying   = false;
+  let animating   = false;
 
-  // DOM
-  const boardEl     = document.getElementById('board');
-  const moveCountEl = document.getElementById('move-count');
-  const timerEl     = document.getElementById('timer');
-  const messageEl   = document.getElementById('message');
-  const overlayEl   = document.getElementById('overlay');
-  const solveStatsEl= document.getElementById('solve-stats');
+  // ── DOM ─────────────────────────────────────────────────────
+  const boardEl      = document.getElementById('board');
+  const overlayEl    = document.getElementById('overlay');
+  const solveStatsEl = document.getElementById('solve-stats');
+  const moveCountEl  = document.getElementById('move-count');
+  const timerEl      = document.getElementById('timer');
+  const messageEl    = document.getElementById('message');
 
-  // ── Grid helpers ────────────────────────────────────────────────────────
-
-  const row = i => Math.floor(i / SIZE);
-  const col = i => i % SIZE;
-  const idx = (r, c) => r * SIZE + c;
-
-  function emptyPos() { return tiles.indexOf(BLANK); }
+  // ── Grid helpers ────────────────────────────────────────────
+  const rowOf  = i => Math.floor(i / SIZE);
+  const colOf  = i => i % SIZE;
+  const idxOf  = (r, c) => r * SIZE + c;
+  const emptyPos = () => tiles.indexOf(BLANK);
 
   function neighbours(i) {
-    const r = row(i), c = col(i), nb = [];
-    if (r > 0)        nb.push(idx(r-1, c));
-    if (r < SIZE - 1) nb.push(idx(r+1, c));
-    if (c > 0)        nb.push(idx(r, c-1));
-    if (c < SIZE - 1) nb.push(idx(r, c+1));
+    const r = rowOf(i), c = colOf(i), nb = [];
+    if (r > 0)        nb.push(idxOf(r-1, c));
+    if (r < SIZE - 1) nb.push(idxOf(r+1, c));
+    if (c > 0)        nb.push(idxOf(r, c-1));
+    if (c < SIZE - 1) nb.push(idxOf(r, c+1));
     return nb;
   }
 
-  // ── Solvability check ───────────────────────────────────────────────────
-  // For even-width grids: (inversions + blank row from bottom) must be even.
+  // Pixel top-left corner for a grid position
+  function tilePixel(pos) {
+    return [
+      PADDING + colOf(pos) * (TILE_SIZE + GAP),
+      PADDING + rowOf(pos) * (TILE_SIZE + GAP),
+    ];
+  }
+
+  // ── Layout computation ──────────────────────────────────────
+  function computeLayout(size) {
+    SIZE      = size;
+    BLANK     = SIZE * SIZE - 1;
+    TILE_SIZE = Math.floor((BOARD_TARGET - 2*PADDING - (SIZE-1)*GAP) / SIZE);
+    BOARD_PX  = 2*PADDING + SIZE*TILE_SIZE + (SIZE-1)*GAP;
+    FONT_SIZE = TILE_SIZE >= 100 ? '1.8rem'
+              : TILE_SIZE >= 70  ? '1.3rem'
+              : TILE_SIZE >= 55  ? '1.0rem'
+              : '0.85rem';
+  }
+
+  // ── Solvability ─────────────────────────────────────────────
+  // Odd-width: inversions must be even.
+  // Even-width: (inversions + blank row from bottom) must be even.
   function isSolvable(arr) {
     const flat = arr.filter(v => v !== BLANK);
     let inv = 0;
     for (let i = 0; i < flat.length - 1; i++)
       for (let j = i + 1; j < flat.length; j++)
         if (flat[i] > flat[j]) inv++;
-    const blankRowFromBottom = SIZE - row(arr.indexOf(BLANK));
+    if (SIZE % 2 === 1) return inv % 2 === 0;
+    const blankRowFromBottom = SIZE - rowOf(arr.indexOf(BLANK));
     return (inv + blankRowFromBottom) % 2 === 0;
   }
 
-  // ── Shuffle ─────────────────────────────────────────────────────────────
+  function isGoal() { return tiles.every((v, i) => v === i); }
+
+  // ── Board initialisation ────────────────────────────────────
+  function initBoard() {
+    boardEl.innerHTML = '';
+    boardEl.style.width  = BOARD_PX + 'px';
+    boardEl.style.height = BOARD_PX + 'px';
+    tileEls = new Map();
+
+    for (let val = 0; val < BLANK; val++) {
+      const el = document.createElement('div');
+      el.className = 'tile no-anim';
+      el.style.width    = TILE_SIZE + 'px';
+      el.style.height   = TILE_SIZE + 'px';
+      el.style.fontSize = FONT_SIZE;
+      el.textContent    = val + 1;
+      el.addEventListener('click', () => applyMove(tiles.indexOf(val)));
+      boardEl.appendChild(el);
+      tileEls.set(val, el);
+    }
+
+    // Place tiles without animation, then enable transitions
+    placeAll();
+    requestAnimationFrame(() => {
+      tileEls.forEach(el => el.classList.remove('no-anim'));
+    });
+    updateMovable();
+  }
+
+  // Set every tile's CSS transform to match the current tiles[] state
+  function placeAll() {
+    tileEls.forEach((el, val) => {
+      const [x, y] = tilePixel(tiles.indexOf(val));
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  }
+
+  // Update the 'movable' highlight class on all tiles
+  function updateMovable() {
+    const movable = new Set(neighbours(emptyPos()));
+    tileEls.forEach((el, val) => {
+      el.classList.toggle('movable', movable.has(tiles.indexOf(val)));
+    });
+  }
+
+  // ── New game ────────────────────────────────────────────────
   function newGame() {
     replaying = false;
+    animating = false;
     stopTimer();
     overlayEl.classList.remove('show');
     messageEl.textContent = '';
@@ -248,54 +340,48 @@
     timerEl.textContent = '0:00';
 
     do {
-      tiles = Array.from({length: TOTAL}, (_, i) => i);
-      for (let i = TOTAL - 1; i > 0; i--) {
+      tiles = Array.from({length: SIZE*SIZE}, (_, i) => i);
+      for (let i = tiles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
       }
     } while (!isSolvable(tiles) || isGoal());
 
-    render();
+    initBoard();
   }
 
-  function isGoal() {
-    return tiles.every((v, i) => v === i);
-  }
-
-  // ── Move a tile ─────────────────────────────────────────────────────────
+  // ── Apply a move ────────────────────────────────────────────
   function applyMove(tilePos, record = true) {
-    if (solved || replaying) return false;
+    if (solved || replaying || animating) return false;
     const empty = emptyPos();
     if (!neighbours(empty).includes(tilePos)) return false;
 
     if (!started) { startTimer(); started = true; }
     if (record) moveHistory.push({emptyBefore: empty, tilePos});
 
-    [tiles[empty], tiles[tilePos]] = [tiles[tilePos], tiles[empty]];
+    slideToEmpty(tilePos, empty);
     moves++;
     moveCountEl.textContent = moves;
-    render();
 
-    if (isGoal()) onWin();
+    animating = true;
+    setTimeout(() => {
+      animating = false;
+      if (isGoal()) onWin();
+    }, ANIM_MS);
+
     return true;
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────
-  function render() {
-    const movable = new Set(neighbours(emptyPos()));
-    boardEl.innerHTML = '';
-    tiles.forEach((val, pos) => {
-      const div = document.createElement('div');
-      div.className = 'tile' + (val === BLANK ? ' empty' : movable.has(pos) ? ' movable' : '');
-      if (val !== BLANK) {
-        div.textContent = val + 1;
-        div.addEventListener('click', () => applyMove(pos));
-      }
-      boardEl.appendChild(div);
-    });
+  // Swap tile at tilePos into the empty cell, animating the tile element
+  function slideToEmpty(tilePos, empty) {
+    const val = tiles[tilePos];
+    [tiles[empty], tiles[tilePos]] = [tiles[tilePos], tiles[empty]];
+    const [x, y] = tilePixel(empty); // tile slides to where empty was
+    tileEls.get(val).style.transform = `translate(${x}px, ${y}px)`;
+    updateMovable();
   }
 
-  // ── Win ─────────────────────────────────────────────────────────────────
+  // ── Win ─────────────────────────────────────────────────────
   function onWin() {
     stopTimer();
     solved = true;
@@ -303,14 +389,14 @@
     overlayEl.classList.add('show');
   }
 
-  // ── Timer ────────────────────────────────────────────────────────────────
+  // ── Timer ────────────────────────────────────────────────────
   function startTimer() {
     timerHandle = setInterval(() => { seconds++; timerEl.textContent = fmt(seconds); }, 1000);
   }
   function stopTimer() { clearInterval(timerHandle); timerHandle = null; }
   function fmt(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
-  // ── Show Solution: replay move history in reverse ────────────────────────
+  // ── Show Solution: replay move history in reverse ────────────
   document.getElementById('btn-solve').addEventListener('click', () => {
     if (replaying || solved) return;
     if (moveHistory.length === 0) {
@@ -318,17 +404,18 @@
       return;
     }
     replaying = true;
+    animating = false;
     stopTimer();
     messageEl.textContent = 'Replaying solution…';
 
-    // Undo each move: slide the tile that was previously the blank back into place
+    // To undo move i: slide the old empty position back — that position
+    // now holds a tile, and the current empty is where the tile was.
     const steps = [...moveHistory].reverse().map(h => h.emptyBefore);
     let i = 0;
 
     function step() {
       if (i >= steps.length) {
         replaying = false;
-        // Reset counters to pre-play state
         moves = 0; seconds = 0; started = false;
         moveHistory = [];
         moveCountEl.textContent = '0';
@@ -336,30 +423,38 @@
         messageEl.textContent = 'Board restored to original shuffle.';
         return;
       }
-      const dest = steps[i++];
+      const dest  = steps[i++];
       const empty = emptyPos();
-      if (neighbours(empty).includes(dest)) {
-        [tiles[empty], tiles[dest]] = [tiles[dest], tiles[empty]];
-        render();
-      }
-      setTimeout(step, 120);
+      if (neighbours(empty).includes(dest)) slideToEmpty(dest, empty);
+      setTimeout(step, ANIM_MS + 20);
     }
     step();
   });
 
-  // ── Shuffle button ───────────────────────────────────────────────────────
+  // ── Shuffle button ───────────────────────────────────────────
   document.getElementById('btn-shuffle').addEventListener('click', newGame);
 
-  // ── Keyboard: arrow keys slide the tile on the opposite side of the blank
+  // ── Difficulty buttons ───────────────────────────────────────
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) return;
+      document.querySelector('.diff-btn.active').classList.remove('active');
+      btn.classList.add('active');
+      computeLayout(parseInt(btn.dataset.size, 10));
+      newGame();
+    });
+  });
+
+  // ── Keyboard: arrow key slides tile on the opposite side of blank
   document.addEventListener('keydown', e => {
     if (solved || replaying) return;
     const empty = emptyPos();
-    const r = row(empty), c = col(empty);
+    const r = rowOf(empty), c = colOf(empty);
     const map = {
-      ArrowUp:    r < SIZE - 1 ? idx(r+1, c) : -1,
-      ArrowDown:  r > 0        ? idx(r-1, c) : -1,
-      ArrowLeft:  c < SIZE - 1 ? idx(r, c+1) : -1,
-      ArrowRight: c > 0        ? idx(r, c-1) : -1,
+      ArrowUp:    r < SIZE-1 ? idxOf(r+1, c) : -1,
+      ArrowDown:  r > 0      ? idxOf(r-1, c) : -1,
+      ArrowLeft:  c < SIZE-1 ? idxOf(r, c+1) : -1,
+      ArrowRight: c > 0      ? idxOf(r, c-1) : -1,
     };
     const target = map[e.key];
     if (target !== undefined && target !== -1) {
@@ -368,7 +463,8 @@
     }
   });
 
-  // ── Start ────────────────────────────────────────────────────────────────
+  // ── Init ─────────────────────────────────────────────────────
+  computeLayout(10);
   newGame();
 })();
 </script>

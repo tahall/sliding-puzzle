@@ -1,10 +1,11 @@
-# Sliding Puzzle — 10×10
+# Sliding Puzzle
 
-A fully client-side sliding puzzle game played on a **10×10 grid** (99 tiles + 1 blank). No dependencies, no build step — just open `index.html` in a browser.
+A fully client-side sliding puzzle game with five difficulty levels (3×3 through 10×10). No dependencies, no build step — just open `index.html` in a browser.
 
 ## Features
 
-- **10×10 grid** — 99 numbered tiles and one blank space
+- **Five difficulty levels** — 3×3, 4×4, 6×6, 8×8, and 10×10 grids
+- **Smooth tile animations** — tiles physically slide into the blank using CSS transforms (140 ms)
 - **Move counter** — tracks the number of tile slides
 - **Timer** — starts on your first move, stops when you solve the puzzle
 - **Highlighted movable tiles** — adjacent tiles that can slide are visually distinguished
@@ -15,9 +16,9 @@ A fully client-side sliding puzzle game played on a **10×10 grid** (99 tiles + 
 ## How to Play
 
 1. Open `index.html` in any modern browser.
-2. Click **Shuffle** (or it auto-shuffles on load).
+2. Select a difficulty (default: 10×10), then click **Shuffle** (or it auto-shuffles on load).
 3. Click a tile adjacent to the blank space to slide it, or use the **arrow keys**.
-4. Arrange all tiles in order (1–99, blank in the bottom-right corner) to win.
+4. Arrange all tiles in order (blank in the bottom-right corner) to win.
 5. Use **Show Solution** at any time to watch your moves play back in reverse — useful if you get stuck or want to analyse your path.
 
 ## Controls
@@ -26,13 +27,16 @@ A fully client-side sliding puzzle game played on a **10×10 grid** (99 tiles + 
 |---|---|
 | Slide a tile | Click the tile |
 | Slide a tile | Arrow keys (←→↑↓) |
+| Change difficulty | 3×3 / 4×4 / 6×6 / 8×8 / 10×10 buttons |
 | New puzzle | Shuffle button |
 | Undo all moves | Show Solution button |
 
 ## Technical Notes
 
-- **Solvability guarantee** — every shuffled board is checked using the standard inversion-count algorithm before being presented. Boards that would be unsolvable (or already solved) are re-shuffled automatically.
-- **Show Solution** works by recording each move the player makes. Replaying them in reverse restores the original shuffle. It does not compute an optimal solution from scratch (which would be computationally infeasible for a 10×10 grid in-browser).
+- **Solvability guarantee** — every shuffled board is checked using the standard inversion-count algorithm before being presented. Odd-width grids require an even inversion count; even-width grids require that inversions plus the blank's row from the bottom is even. Boards that fail either check (or are already solved) are re-shuffled automatically.
+- **Smooth animations** — tiles are absolutely positioned in the board container and move via `transform: translate()`. Only the two tiles involved in each move have their transform updated; CSS `transition` handles the rest. A short block on rapid input prevents visual glitches mid-animation.
+- **Show Solution** works by recording each move the player makes and replaying them in reverse. It does not compute an optimal path from scratch (infeasible for large grids in-browser).
+- **Difficulty** — the tile size scales automatically so all grid sizes fit within a consistent ~560 px board area.
 - Pure vanilla HTML/CSS/JS — no frameworks, no external assets.
 
 ## Browser Support
