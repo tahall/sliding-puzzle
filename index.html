@@ -13,7 +13,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 18px;
+      gap: 16px;
       background: #1a1a2e;
       font-family: 'Segoe UI', system-ui, sans-serif;
       color: #eee;
@@ -26,14 +26,13 @@
       color: #e94560;
     }
 
-    /* ── Difficulty selector ─────────────────────────────────── */
+    /* ── Difficulty selector ─────────────────────────────────────── */
     #difficulty {
       display: flex;
       border-radius: 6px;
       overflow: hidden;
       border: 1px solid #2a5a90;
     }
-
     .diff-btn {
       padding: 7px 16px;
       background: #0f3460;
@@ -43,45 +42,35 @@
       cursor: pointer;
       font-size: 0.85rem;
       font-weight: 600;
-      letter-spacing: 0.3px;
       transition: background 0.15s, color 0.15s;
     }
     .diff-btn:last-child { border-right: none; }
     .diff-btn:hover { background: #16405a; color: #cce; }
     .diff-btn.active { background: #e94560; color: #fff; cursor: default; }
 
-    /* ── Stats ───────────────────────────────────────────────── */
+    /* ── Stats ───────────────────────────────────────────────────── */
     #info { display: flex; gap: 40px; }
-
     .stat label {
-      color: #aaa;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: block;
-      text-align: center;
+      color: #aaa; font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 1px; display: block; text-align: center;
     }
     .stat span {
-      display: block;
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #e94560;
-      text-align: center;
-      min-width: 3ch;
+      display: block; font-size: 1.4rem; font-weight: bold;
+      color: #e94560; text-align: center; min-width: 3ch;
     }
 
-    /* ── Board ───────────────────────────────────────────────── */
+    /* ── Board ───────────────────────────────────────────────────── */
     #board-wrap { position: relative; }
 
     #board {
-      position: relative;        /* tiles are absolute inside */
+      position: relative;
       background: #16213e;
       border-radius: 8px;
       box-shadow: 0 0 30px rgba(233,69,96,0.3);
       /* width/height set by JS */
     }
 
-    /* ── Tiles ───────────────────────────────────────────────── */
+    /* ── Tiles ───────────────────────────────────────────────────── */
     .tile {
       position: absolute;
       display: flex;
@@ -94,75 +83,93 @@
       color: #cce;
       border: 1px solid #2a5a90;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-      /* Smooth sliding animation */
       transition: transform 140ms ease, box-shadow 80ms ease;
-      /* width/height/font-size set by JS */
+      overflow: hidden;          /* clips image to rounded corners */
+      /* width / height / font-size set by JS */
     }
-
-    /* Suppress animation when initially placing tiles */
     .tile.no-anim { transition: none !important; }
 
     .tile:hover {
-      box-shadow: 0 0 10px rgba(233,69,96,0.5),
-                  inset 0 1px 0 rgba(255,255,255,0.1);
+      box-shadow: 0 0 10px rgba(233,69,96,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
       z-index: 2;
     }
 
+    /* Plain (no-image) movable highlight */
     .tile.movable {
       background: linear-gradient(135deg, #16405a, #1e6080);
       border-color: #3a9abf;
       color: #aef;
-      box-shadow: 0 0 6px rgba(100,200,255,0.25),
-                  inset 0 1px 0 rgba(255,255,255,0.15);
+      box-shadow: 0 0 6px rgba(100,200,255,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
-    /* ── Overlay ─────────────────────────────────────────────── */
+    /* ── Image-mode tile overrides ───────────────────────────────── */
+    /* background-image, background-size, background-position set by JS */
+    .tile.has-image {
+      background-color: #000;    /* fallback while loading */
+      /* gradient overridden by background-image shorthand in JS */
+      border-color: rgba(0,0,0,0.5);
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+    }
+    .tile.has-image.movable {
+      /* highlight without obscuring the image */
+      border: 2px solid #3af;
+      box-shadow: 0 0 8px rgba(80,180,255,0.6), inset 0 0 0 1px rgba(80,180,255,0.3);
+    }
+    .tile.has-image:hover {
+      box-shadow: 0 0 12px rgba(233,69,96,0.7);
+    }
+
+    /* Numbers toggle: hide the span inside tiles */
+    #board.hide-numbers .tile-label { display: none; }
+
+    /* ── Overlay ─────────────────────────────────────────────────── */
     #overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(26,26,46,0.9);
-      border-radius: 8px;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #4caf50;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 10;
+      display: none; position: absolute; inset: 0;
+      background: rgba(26,26,46,0.9); border-radius: 8px;
+      align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: bold; color: #4caf50;
+      flex-direction: column; gap: 10px; z-index: 10;
     }
     #overlay.show { display: flex; }
     #overlay .sub { font-size: 1rem; color: #aaa; }
 
-    /* ── Controls ────────────────────────────────────────────── */
-    #controls { display: flex; gap: 12px; }
-
-    button.ctrl {
-      padding: 10px 24px;
-      border: none;
+    /* Solved image preview inside overlay */
+    #overlay canvas {
       border-radius: 6px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.5px;
+      box-shadow: 0 0 20px rgba(76,175,80,0.4);
+      max-width: 200px;
+      max-height: 200px;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────── */
+    #controls, #img-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+    .ctrl {
+      padding: 9px 20px;
+      border: none; border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; letter-spacing: 0.4px;
       transition: transform 0.1s, box-shadow 0.1s;
     }
-    button.ctrl:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-    }
-    button.ctrl:active { transform: translateY(0); }
+    .ctrl:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+    .ctrl:active { transform: translateY(0); }
 
     #btn-shuffle { background: #e94560; color: #fff; }
     #btn-solve   { background: #0f3460; color: #aef; border: 1px solid #3a9abf; }
+    #btn-upload  { background: #1a5a30; color: #8f8; border: 1px solid #3a9a60; }
+    #btn-numbers { background: #2a3a5a; color: #adf; border: 1px solid #3a6a90; }
+    #btn-clear   { background: #3a2a1a; color: #fa8; border: 1px solid #8a4a20; }
+
+    /* label acts as button for file input */
+    label.ctrl { display: inline-block; line-height: normal; }
+    label.ctrl input { display: none; }
+
+    #img-controls { display: none; }   /* shown once image is loaded */
 
     #message {
-      font-size: 1rem;
-      font-weight: 600;
-      min-height: 1.4rem;
-      letter-spacing: 0.5px;
-      color: #778;
+      font-size: 1rem; font-weight: 600;
+      min-height: 1.4rem; letter-spacing: 0.5px; color: #778;
     }
   </style>
 </head>
@@ -173,20 +180,14 @@
 <div id="difficulty">
   <button class="diff-btn" data-size="3">3×3</button>
   <button class="diff-btn" data-size="4">4×4</button>
-  <button class="diff-btn" data-size="6">6×6</button>
+  <button class="diff-btn active" data-size="6">6×6</button>
   <button class="diff-btn" data-size="8">8×8</button>
-  <button class="diff-btn active" data-size="10">10×10</button>
+  <button class="diff-btn" data-size="10">10×10</button>
 </div>
 
 <div id="info">
-  <div class="stat">
-    <label>Moves</label>
-    <span id="move-count">0</span>
-  </div>
-  <div class="stat">
-    <label>Time</label>
-    <span id="timer">0:00</span>
-  </div>
+  <div class="stat"><label>Moves</label><span id="move-count">0</span></div>
+  <div class="stat"><label>Time</label><span id="timer">0:00</span></div>
 </div>
 
 <div id="board-wrap">
@@ -199,44 +200,56 @@
 
 <div id="controls">
   <button id="btn-shuffle" class="ctrl">Shuffle</button>
-  <button id="btn-solve" class="ctrl">Show Solution</button>
+  <button id="btn-solve"   class="ctrl">Show Solution</button>
+  <label  id="btn-upload"  class="ctrl">
+    Upload Image
+    <input type="file" id="file-input" accept="image/*">
+  </label>
+</div>
+
+<!-- shown only when an image is loaded -->
+<div id="img-controls">
+  <button id="btn-numbers" class="ctrl">Numbers: Off</button>
+  <button id="btn-clear"   class="ctrl">Clear Image</button>
 </div>
 
 <div id="message"></div>
 
 <script>
 (() => {
-  // ── Layout constants ────────────────────────────────────────
-  const BOARD_TARGET = 560; // desired board pixel size
+  // ── Layout constants ──────────────────────────────────────────
+  const BOARD_TARGET = 560;
   const GAP     = 3;
   const PADDING = 6;
-  const ANIM_MS = 140;      // tile slide duration (ms)
+  const ANIM_MS = 140;
 
-  // ── Game state ──────────────────────────────────────────────
+  // ── Game state ────────────────────────────────────────────────
   let SIZE, BLANK, TILE_SIZE, BOARD_PX, FONT_SIZE;
-  let tiles       = [];  // tiles[pos] = value; BLANK marks the empty cell
-  let tileEls     = new Map(); // value → <div>
-  let moveHistory = [];  // {emptyBefore, tilePos} per player move
-  let moves       = 0;
-  let seconds     = 0;
+  let tiles       = [];
+  let tileEls     = new Map();   // value → <div>
+  let moveHistory = [];
+  let moves = 0, seconds = 0;
   let timerHandle = null;
-  let started     = false;
-  let solved      = false;
-  let replaying   = false;
-  let animating   = false;
+  let started = false, solved = false, replaying = false, animating = false;
 
-  // ── DOM ─────────────────────────────────────────────────────
-  const boardEl      = document.getElementById('board');
-  const overlayEl    = document.getElementById('overlay');
-  const solveStatsEl = document.getElementById('solve-stats');
-  const moveCountEl  = document.getElementById('move-count');
-  const timerEl      = document.getElementById('timer');
-  const messageEl    = document.getElementById('message');
+  // ── Image state ───────────────────────────────────────────────
+  let imageDataUrl  = null;   // pre-cropped square data URL
+  let showNumbers   = false;  // default off when image is loaded
 
-  // ── Grid helpers ────────────────────────────────────────────
-  const rowOf  = i => Math.floor(i / SIZE);
-  const colOf  = i => i % SIZE;
-  const idxOf  = (r, c) => r * SIZE + c;
+  // ── DOM ───────────────────────────────────────────────────────
+  const boardEl       = document.getElementById('board');
+  const overlayEl     = document.getElementById('overlay');
+  const solveStatsEl  = document.getElementById('solve-stats');
+  const moveCountEl   = document.getElementById('move-count');
+  const timerEl       = document.getElementById('timer');
+  const messageEl     = document.getElementById('message');
+  const imgControlsEl = document.getElementById('img-controls');
+  const btnNumbers    = document.getElementById('btn-numbers');
+
+  // ── Grid helpers ──────────────────────────────────────────────
+  const rowOf    = i => Math.floor(i / SIZE);
+  const colOf    = i => i % SIZE;
+  const idxOf    = (r, c) => r * SIZE + c;
   const emptyPos = () => tiles.indexOf(BLANK);
 
   function neighbours(i) {
@@ -248,7 +261,6 @@
     return nb;
   }
 
-  // Pixel top-left corner for a grid position
   function tilePixel(pos) {
     return [
       PADDING + colOf(pos) * (TILE_SIZE + GAP),
@@ -256,7 +268,7 @@
     ];
   }
 
-  // ── Layout computation ──────────────────────────────────────
+  // ── Layout ────────────────────────────────────────────────────
   function computeLayout(size) {
     SIZE      = size;
     BLANK     = SIZE * SIZE - 1;
@@ -268,9 +280,7 @@
               : '0.85rem';
   }
 
-  // ── Solvability ─────────────────────────────────────────────
-  // Odd-width: inversions must be even.
-  // Even-width: (inversions + blank row from bottom) must be even.
+  // ── Solvability ───────────────────────────────────────────────
   function isSolvable(arr) {
     const flat = arr.filter(v => v !== BLANK);
     let inv = 0;
@@ -284,7 +294,40 @@
 
   function isGoal() { return tiles.every((v, i) => v === i); }
 
-  // ── Board initialisation ────────────────────────────────────
+  // ── Image processing ──────────────────────────────────────────
+  // Crop original image to a square canvas, save as data URL.
+  // We use 800px so it looks sharp at all difficulty sizes.
+  function cropToSquare(img) {
+    const MASTER = 800;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = MASTER;
+    const ctx = canvas.getContext('2d');
+    const s   = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx  = (img.naturalWidth  - s) / 2;
+    const sy  = (img.naturalHeight - s) / 2;
+    ctx.drawImage(img, sx, sy, s, s, 0, 0, MASTER, MASTER);
+    return canvas.toDataURL('image/jpeg', 0.92);
+  }
+
+  // Apply image background to a single tile element.
+  // `val` is the tile's face value (0-based); its solved-state position
+  // determines which slice of the image it shows.
+  function applyImageToTile(el, val) {
+    const r = Math.floor(val / SIZE);
+    const c = val % SIZE;
+    const totalPx = SIZE * TILE_SIZE;
+    el.style.backgroundImage    = `url('${imageDataUrl}')`;
+    el.style.backgroundSize     = `${totalPx}px ${totalPx}px`;
+    el.style.backgroundPosition = `${-c * TILE_SIZE}px ${-r * TILE_SIZE}px`;
+    el.classList.add('has-image');
+  }
+
+  function removeImageFromTile(el) {
+    el.style.backgroundImage = el.style.backgroundSize = el.style.backgroundPosition = '';
+    el.classList.remove('has-image');
+  }
+
+  // ── Board init ────────────────────────────────────────────────
   function initBoard() {
     boardEl.innerHTML = '';
     boardEl.style.width  = BOARD_PX + 'px';
@@ -297,21 +340,28 @@
       el.style.width    = TILE_SIZE + 'px';
       el.style.height   = TILE_SIZE + 'px';
       el.style.fontSize = FONT_SIZE;
-      el.textContent    = val + 1;
+
+      // Wrap label text in a span so CSS can toggle visibility independently
+      const label = document.createElement('span');
+      label.className   = 'tile-label';
+      label.textContent = val + 1;
+      el.appendChild(label);
+
       el.addEventListener('click', () => applyMove(tiles.indexOf(val)));
       boardEl.appendChild(el);
       tileEls.set(val, el);
+
+      if (imageDataUrl) applyImageToTile(el, val);
     }
 
-    // Place tiles without animation, then enable transitions
+    // Sync numbers-toggle state
+    boardEl.classList.toggle('hide-numbers', imageDataUrl !== null && !showNumbers);
+
     placeAll();
-    requestAnimationFrame(() => {
-      tileEls.forEach(el => el.classList.remove('no-anim'));
-    });
+    requestAnimationFrame(() => tileEls.forEach(el => el.classList.remove('no-anim')));
     updateMovable();
   }
 
-  // Set every tile's CSS transform to match the current tiles[] state
   function placeAll() {
     tileEls.forEach((el, val) => {
       const [x, y] = tilePixel(tiles.indexOf(val));
@@ -319,7 +369,6 @@
     });
   }
 
-  // Update the 'movable' highlight class on all tiles
   function updateMovable() {
     const movable = new Set(neighbours(emptyPos()));
     tileEls.forEach((el, val) => {
@@ -327,7 +376,7 @@
     });
   }
 
-  // ── New game ────────────────────────────────────────────────
+  // ── New game ──────────────────────────────────────────────────
   function newGame() {
     replaying = false;
     animating = false;
@@ -350,7 +399,7 @@
     initBoard();
   }
 
-  // ── Apply a move ────────────────────────────────────────────
+  // ── Move ──────────────────────────────────────────────────────
   function applyMove(tilePos, record = true) {
     if (solved || replaying || animating) return false;
     const empty = emptyPos();
@@ -364,77 +413,86 @@
     moveCountEl.textContent = moves;
 
     animating = true;
-    setTimeout(() => {
-      animating = false;
-      if (isGoal()) onWin();
-    }, ANIM_MS);
-
+    setTimeout(() => { animating = false; if (isGoal()) onWin(); }, ANIM_MS);
     return true;
   }
 
-  // Swap tile at tilePos into the empty cell, animating the tile element
   function slideToEmpty(tilePos, empty) {
     const val = tiles[tilePos];
     [tiles[empty], tiles[tilePos]] = [tiles[tilePos], tiles[empty]];
-    const [x, y] = tilePixel(empty); // tile slides to where empty was
+    const [x, y] = tilePixel(empty);
     tileEls.get(val).style.transform = `translate(${x}px, ${y}px)`;
     updateMovable();
   }
 
-  // ── Win ─────────────────────────────────────────────────────
+  // ── Win ───────────────────────────────────────────────────────
   function onWin() {
     stopTimer();
     solved = true;
-    solveStatsEl.textContent = `${moves} moves · ${fmt(seconds)}`;
+    overlayEl.innerHTML = ''; // rebuild overlay content
+
+    const title = document.createElement('div');
+    title.textContent = 'Puzzle Solved!';
+    overlayEl.appendChild(title);
+
+    const sub = document.createElement('div');
+    sub.className   = 'sub';
+    sub.textContent = `${moves} moves · ${fmt(seconds)}`;
+    overlayEl.appendChild(sub);
+
+    // Show completed image thumbnail if in image mode
+    if (imageDataUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const cv  = document.createElement('canvas');
+        const sz  = Math.min(180, BOARD_PX * 0.4);
+        cv.width  = cv.height = sz;
+        cv.getContext('2d').drawImage(img, 0, 0, sz, sz);
+        overlayEl.appendChild(cv);
+      };
+      img.src = imageDataUrl;
+    }
+
     overlayEl.classList.add('show');
   }
 
-  // ── Timer ────────────────────────────────────────────────────
+  // ── Timer ─────────────────────────────────────────────────────
   function startTimer() {
     timerHandle = setInterval(() => { seconds++; timerEl.textContent = fmt(seconds); }, 1000);
   }
   function stopTimer() { clearInterval(timerHandle); timerHandle = null; }
   function fmt(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
-  // ── Show Solution: replay move history in reverse ────────────
+  // ── Show Solution ─────────────────────────────────────────────
   document.getElementById('btn-solve').addEventListener('click', () => {
     if (replaying || solved) return;
-    if (moveHistory.length === 0) {
-      messageEl.textContent = 'Make at least one move first.';
-      return;
-    }
+    if (moveHistory.length === 0) { messageEl.textContent = 'Make at least one move first.'; return; }
     replaying = true;
     animating = false;
     stopTimer();
     messageEl.textContent = 'Replaying solution…';
 
-    // To undo move i: slide the old empty position back — that position
-    // now holds a tile, and the current empty is where the tile was.
     const steps = [...moveHistory].reverse().map(h => h.emptyBefore);
     let i = 0;
-
     function step() {
       if (i >= steps.length) {
         replaying = false;
-        moves = 0; seconds = 0; started = false;
-        moveHistory = [];
-        moveCountEl.textContent = '0';
-        timerEl.textContent = '0:00';
+        moves = 0; seconds = 0; started = false; moveHistory = [];
+        moveCountEl.textContent = '0'; timerEl.textContent = '0:00';
         messageEl.textContent = 'Board restored to original shuffle.';
         return;
       }
-      const dest  = steps[i++];
-      const empty = emptyPos();
+      const dest = steps[i++], empty = emptyPos();
       if (neighbours(empty).includes(dest)) slideToEmpty(dest, empty);
       setTimeout(step, ANIM_MS + 20);
     }
     step();
   });
 
-  // ── Shuffle button ───────────────────────────────────────────
+  // ── Shuffle button ────────────────────────────────────────────
   document.getElementById('btn-shuffle').addEventListener('click', newGame);
 
-  // ── Difficulty buttons ───────────────────────────────────────
+  // ── Difficulty buttons ────────────────────────────────────────
   document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.classList.contains('active')) return;
@@ -445,11 +503,50 @@
     });
   });
 
-  // ── Keyboard: arrow key slides tile on the opposite side of blank
+  // ── Image upload ──────────────────────────────────────────────
+  document.getElementById('file-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = ''; // allow re-uploading same file
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        imageDataUrl = cropToSquare(img);
+        showNumbers  = false;             // default: hide numbers in image mode
+        btnNumbers.textContent = 'Numbers: Off';
+        imgControlsEl.style.display = 'flex';
+        messageEl.textContent = '';
+        // Re-apply to current board without reshuffling
+        tileEls.forEach((el, val) => applyImageToTile(el, val));
+        boardEl.classList.add('hide-numbers');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ── Numbers toggle ────────────────────────────────────────────
+  btnNumbers.addEventListener('click', () => {
+    showNumbers = !showNumbers;
+    btnNumbers.textContent = showNumbers ? 'Numbers: On' : 'Numbers: Off';
+    boardEl.classList.toggle('hide-numbers', !showNumbers);
+  });
+
+  // ── Clear image ───────────────────────────────────────────────
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    imageDataUrl = null;
+    showNumbers  = true;
+    imgControlsEl.style.display = 'none';
+    boardEl.classList.remove('hide-numbers');
+    tileEls.forEach(el => removeImageFromTile(el));
+  });
+
+  // ── Keyboard ──────────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     if (solved || replaying) return;
-    const empty = emptyPos();
-    const r = rowOf(empty), c = colOf(empty);
+    const empty = emptyPos(), r = rowOf(empty), c = colOf(empty);
     const map = {
       ArrowUp:    r < SIZE-1 ? idxOf(r+1, c) : -1,
       ArrowDown:  r > 0      ? idxOf(r-1, c) : -1,
@@ -457,14 +554,11 @@
       ArrowRight: c > 0      ? idxOf(r, c-1) : -1,
     };
     const target = map[e.key];
-    if (target !== undefined && target !== -1) {
-      e.preventDefault();
-      applyMove(target);
-    }
+    if (target !== undefined && target !== -1) { e.preventDefault(); applyMove(target); }
   });
 
-  // ── Init ─────────────────────────────────────────────────────
-  computeLayout(10);
+  // ── Init ──────────────────────────────────────────────────────
+  computeLayout(6);
   newGame();
 })();
 </script>
