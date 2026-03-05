@@ -20,28 +20,14 @@
       padding: 20px;
     }
 
-    h1 {
-      font-size: 2rem;
-      letter-spacing: 2px;
-      color: #e94560;
-    }
+    h1 { font-size: 2rem; letter-spacing: 2px; color: #e94560; }
 
     /* ── Difficulty selector ─────────────────────────────────────── */
-    #difficulty {
-      display: flex;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #2a5a90;
-    }
+    #difficulty { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #2a5a90; }
     .diff-btn {
-      padding: 7px 16px;
-      background: #0f3460;
-      color: #778;
-      border: none;
-      border-right: 1px solid #2a5a90;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
+      padding: 7px 16px; background: #0f3460; color: #778;
+      border: none; border-right: 1px solid #2a5a90;
+      cursor: pointer; font-size: 0.85rem; font-weight: 600;
       transition: background 0.15s, color 0.15s;
     }
     .diff-btn:last-child { border-right: none; }
@@ -50,184 +36,109 @@
 
     /* ── Stats ───────────────────────────────────────────────────── */
     #info { display: flex; gap: 40px; }
-    .stat label {
-      color: #aaa; font-size: 0.72rem; text-transform: uppercase;
-      letter-spacing: 1px; display: block; text-align: center;
-    }
-    .stat span {
-      display: block; font-size: 1.4rem; font-weight: bold;
-      color: #e94560; text-align: center; min-width: 3ch;
-    }
+    .stat label { color: #aaa; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; display: block; text-align: center; }
+    .stat span  { display: block; font-size: 1.4rem; font-weight: bold; color: #e94560; text-align: center; min-width: 3ch; }
 
     /* ── Board ───────────────────────────────────────────────────── */
     #board-wrap { position: relative; }
-
-    #board {
-      position: relative;
-      background: #16213e;
-      border-radius: 8px;
-      box-shadow: 0 0 30px rgba(233,69,96,0.3);
-      /* width/height set by JS */
-    }
+    #board { position: relative; background: #16213e; border-radius: 8px; box-shadow: 0 0 30px rgba(233,69,96,0.3); }
 
     /* ── Tiles ───────────────────────────────────────────────────── */
     .tile {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
+      position: absolute; display: flex; align-items: center; justify-content: center;
+      border-radius: 5px; font-weight: bold; cursor: pointer; overflow: hidden;
       background: linear-gradient(135deg, #0f3460, #1a4a80);
-      color: #cce;
-      border: 1px solid #2a5a90;
+      color: #cce; border: 1px solid #2a5a90;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
       transition: transform 140ms ease, box-shadow 80ms ease;
-      overflow: hidden;          /* clips image to rounded corners */
-      /* width / height / font-size set by JS */
     }
     .tile.no-anim { transition: none !important; }
-
-    .tile:hover {
-      box-shadow: 0 0 10px rgba(233,69,96,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-      z-index: 2;
-    }
-
-    /* Plain (no-image) movable highlight */
+    .tile:hover { box-shadow: 0 0 10px rgba(233,69,96,0.5), inset 0 1px 0 rgba(255,255,255,0.1); z-index: 2; }
     .tile.movable {
-      background: linear-gradient(135deg, #16405a, #1e6080);
-      border-color: #3a9abf;
-      color: #aef;
+      background: linear-gradient(135deg, #16405a, #1e6080); border-color: #3a9abf; color: #aef;
       box-shadow: 0 0 6px rgba(100,200,255,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
     }
-
-    /* ── Image-mode tile overrides ───────────────────────────────── */
-    /* background-image, background-size, background-position set by JS */
-    .tile.has-image {
-      background-color: #000;    /* fallback while loading */
-      /* gradient overridden by background-image shorthand in JS */
-      border-color: rgba(0,0,0,0.5);
-      color: #fff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
-    }
-    .tile.has-image.movable {
-      /* highlight without obscuring the image */
-      border: 2px solid #3af;
-      box-shadow: 0 0 8px rgba(80,180,255,0.6), inset 0 0 0 1px rgba(80,180,255,0.3);
-    }
-    .tile.has-image:hover {
-      box-shadow: 0 0 12px rgba(233,69,96,0.7);
-    }
-
-    /* Numbers toggle: hide the span inside tiles */
+    .tile.has-image { background-color: #000; border-color: rgba(0,0,0,0.5); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7); }
+    .tile.has-image.movable { border: 2px solid #3af; box-shadow: 0 0 8px rgba(80,180,255,0.6), inset 0 0 0 1px rgba(80,180,255,0.3); }
+    .tile.has-image:hover { box-shadow: 0 0 12px rgba(233,69,96,0.7); }
     #board.hide-numbers .tile-label { display: none; }
 
     /* ── Overlay ─────────────────────────────────────────────────── */
     #overlay {
-      display: none; position: absolute; inset: 0;
-      background: rgba(26,26,46,0.9); border-radius: 8px;
-      align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: bold; color: #4caf50;
-      flex-direction: column; gap: 10px; z-index: 10;
+      display: none; position: absolute; inset: 0; background: rgba(26,26,46,0.9); border-radius: 8px;
+      align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;
+      color: #4caf50; flex-direction: column; gap: 10px; z-index: 10;
     }
     #overlay.show { display: flex; }
     #overlay .sub { font-size: 1rem; color: #aaa; }
-
-    /* Solved image preview inside overlay */
-    #overlay canvas {
-      border-radius: 6px;
-      box-shadow: 0 0 20px rgba(76,175,80,0.4);
-      max-width: 200px;
-      max-height: 200px;
-    }
+    #overlay canvas { border-radius: 6px; box-shadow: 0 0 20px rgba(76,175,80,0.4); max-width: 200px; max-height: 200px; }
 
     /* ── Buttons ─────────────────────────────────────────────────── */
     #controls, #img-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-
     .ctrl {
-      padding: 9px 20px;
-      border: none; border-radius: 6px;
-      font-size: 0.9rem; font-weight: 600;
-      cursor: pointer; letter-spacing: 0.4px;
+      padding: 9px 20px; border: none; border-radius: 6px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; letter-spacing: 0.4px;
       transition: transform 0.1s, box-shadow 0.1s;
     }
-    .ctrl:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+    .ctrl:hover  { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
     .ctrl:active { transform: translateY(0); }
+    label.ctrl { display: inline-block; line-height: normal; }
+    label.ctrl input { display: none; }
 
     #btn-shuffle { background: #e94560; color: #fff; }
     #btn-solve   { background: #0f3460; color: #aef; border: 1px solid #3a9abf; }
     #btn-upload  { background: #1a5a30; color: #8f8; border: 1px solid #3a9a60; }
-    #btn-numbers { background: #2a3a5a; color: #adf; border: 1px solid #3a6a90; }
-    #btn-clear   { background: #3a2a1a; color: #fa8; border: 1px solid #8a4a20; }
     #btn-mute    { background: #2a2a3a; color: #aaa; border: 1px solid #4a4a6a; }
     #btn-mute.muted { color: #556; }
+    #btn-numbers { background: #2a3a5a; color: #adf; border: 1px solid #3a6a90; }
+    #btn-clear   { background: #3a2a1a; color: #fa8; border: 1px solid #8a4a20; }
+    #img-controls { display: none; }
 
-    /* label acts as button for file input */
-    label.ctrl { display: inline-block; line-height: normal; }
-    label.ctrl input { display: none; }
+    /* ── Gallery ─────────────────────────────────────────────────── */
+    #gallery-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 
-    #img-controls { display: none; }   /* shown once image is loaded */
+    /* Category tabs */
+    #cat-tabs { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #2a5a90; }
+    .cat-btn {
+      padding: 5px 14px; background: #0f3460; color: #778;
+      border: none; border-right: 1px solid #2a5a90;
+      cursor: pointer; font-size: 0.8rem; font-weight: 600;
+      transition: background 0.15s, color 0.15s;
+    }
+    .cat-btn:last-child { border-right: none; }
+    .cat-btn:hover  { background: #16405a; color: #cce; }
+    .cat-btn.active { background: #e94560; color: #fff; cursor: default; }
 
-    /* ── Image gallery ───────────────────────────────────────────── */
+    /* Scrollable thumbnail row */
     #gallery {
-      display: flex;
-      gap: 8px;
-      max-width: 590px;
-      overflow-x: auto;
+      display: flex; gap: 8px;
+      max-width: 590px; overflow-x: auto;
       padding: 2px 2px 6px;
-      scrollbar-width: thin;
-      scrollbar-color: #2a5a90 transparent;
+      scrollbar-width: thin; scrollbar-color: #2a5a90 transparent;
     }
     #gallery::-webkit-scrollbar { height: 4px; }
     #gallery::-webkit-scrollbar-thumb { background: #2a5a90; border-radius: 2px; }
 
     .preset-btn {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+      gap: 4px; background: none; border: none; padding: 0; cursor: pointer;
     }
-
     .preset-thumb {
-      width: 76px;
-      height: 76px;
-      object-fit: cover;
-      border-radius: 5px;
-      border: 2px solid #2a3a5a;
-      display: block;
-      background: #16213e;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 76px; height: 76px; object-fit: cover;
+      border-radius: 5px; border: 2px solid #2a3a5a; display: block;
+      background: #16213e; transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .preset-btn:hover .preset-thumb {
-      border-color: #e94560;
-      box-shadow: 0 0 8px rgba(233,69,96,0.4);
+    .preset-thumb.broken {
+      /* show placeholder text instead of broken icon */
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: #556; text-align: center; padding: 4px;
     }
-    .preset-btn.active .preset-thumb {
-      border-color: #e94560;
-      box-shadow: 0 0 10px rgba(233,69,96,0.6);
-    }
-
-    .preset-name {
-      font-size: 0.62rem;
-      color: #778;
-      text-align: center;
-      max-width: 76px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .preset-btn:hover .preset-thumb { border-color: #e94560; box-shadow: 0 0 8px rgba(233,69,96,0.4); }
+    .preset-btn.active .preset-thumb { border-color: #e94560; box-shadow: 0 0 10px rgba(233,69,96,0.6); }
+    .preset-name { font-size: 0.62rem; color: #778; text-align: center; max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .preset-btn.active .preset-name { color: #e94560; }
 
-    #message {
-      font-size: 1rem; font-weight: 600;
-      min-height: 1.4rem; letter-spacing: 0.5px; color: #778;
-    }
+    #message { font-size: 1rem; font-weight: 600; min-height: 1.4rem; letter-spacing: 0.5px; color: #778; }
   </style>
 </head>
 <body>
@@ -265,8 +176,16 @@
   <button id="btn-mute"    class="ctrl">Sound: On</button>
 </div>
 
-<!-- preset image gallery — always visible -->
-<div id="gallery"></div>
+<!-- preset image gallery -->
+<div id="gallery-wrap">
+  <div id="cat-tabs">
+    <button class="cat-btn active" data-cat="art">Art</button>
+    <button class="cat-btn" data-cat="nasa">NASA</button>
+    <button class="cat-btn" data-cat="animals">Dogs &amp; Cats</button>
+    <button class="cat-btn" data-cat="flowers">Flowers</button>
+  </div>
+  <div id="gallery"></div>
+</div>
 
 <!-- shown only when an image is loaded -->
 <div id="img-controls">
@@ -287,15 +206,15 @@
   // ── Game state ────────────────────────────────────────────────
   let SIZE, BLANK, TILE_SIZE, BOARD_PX, FONT_SIZE;
   let tiles       = [];
-  let tileEls     = new Map();   // value → <div>
+  let tileEls     = new Map();
   let moveHistory = [];
   let moves = 0, seconds = 0;
   let timerHandle = null;
   let started = false, solved = false, replaying = false, animating = false;
 
   // ── Image state ───────────────────────────────────────────────
-  let imageDataUrl  = null;   // pre-cropped square data URL
-  let showNumbers   = false;  // default off when image is loaded
+  let imageDataUrl = null;
+  let showNumbers  = false;
 
   // ── Sound ─────────────────────────────────────────────────────
   let audioCtx = null;
@@ -305,49 +224,35 @@
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     return audioCtx;
   }
-
-  // Short wooden "thunk" for each tile slide
   function playSlide() {
     if (muted) return;
-    const ctx = getAudioCtx();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    const ctx = getAudioCtx(), osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(300, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.09);
     gain.gain.setValueAtTime(0.18, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.09);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.09);
   }
-
-  // Ascending C-major arpeggio for win
   function playWin() {
     if (muted) return;
-    const ctx   = getAudioCtx();
-    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-    notes.forEach((freq, i) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+    const ctx = getAudioCtx();
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
       const t = ctx.currentTime + i * 0.13;
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
       gain.gain.setValueAtTime(0, t);
       gain.gain.linearRampToValueAtTime(0.22, t + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
-      osc.start(t);
-      osc.stop(t + 0.35);
+      osc.start(t); osc.stop(t + 0.35);
     });
   }
 
   // ── DOM ───────────────────────────────────────────────────────
   const boardEl       = document.getElementById('board');
   const overlayEl     = document.getElementById('overlay');
-  const solveStatsEl  = document.getElementById('solve-stats');
   const moveCountEl   = document.getElementById('move-count');
   const timerEl       = document.getElementById('timer');
   const messageEl     = document.getElementById('message');
@@ -370,10 +275,7 @@
   }
 
   function tilePixel(pos) {
-    return [
-      PADDING + colOf(pos) * (TILE_SIZE + GAP),
-      PADDING + rowOf(pos) * (TILE_SIZE + GAP),
-    ];
+    return [PADDING + colOf(pos) * (TILE_SIZE + GAP), PADDING + rowOf(pos) * (TILE_SIZE + GAP)];
   }
 
   // ── Layout ────────────────────────────────────────────────────
@@ -382,10 +284,7 @@
     BLANK     = SIZE * SIZE - 1;
     TILE_SIZE = Math.floor((BOARD_TARGET - 2*PADDING - (SIZE-1)*GAP) / SIZE);
     BOARD_PX  = 2*PADDING + SIZE*TILE_SIZE + (SIZE-1)*GAP;
-    FONT_SIZE = TILE_SIZE >= 100 ? '1.8rem'
-              : TILE_SIZE >= 70  ? '1.3rem'
-              : TILE_SIZE >= 55  ? '1.0rem'
-              : '0.85rem';
+    FONT_SIZE = TILE_SIZE >= 100 ? '1.8rem' : TILE_SIZE >= 70 ? '1.3rem' : TILE_SIZE >= 55 ? '1.0rem' : '0.85rem';
   }
 
   // ── Solvability ───────────────────────────────────────────────
@@ -403,27 +302,17 @@
   function isGoal() { return tiles.every((v, i) => v === i); }
 
   // ── Image processing ──────────────────────────────────────────
-  // Crop original image to a square canvas, save as data URL.
-  // We use 800px so it looks sharp at all difficulty sizes.
   function cropToSquare(img) {
-    const MASTER = 800;
-    const canvas = document.createElement('canvas');
+    const MASTER = 800, canvas = document.createElement('canvas');
     canvas.width = canvas.height = MASTER;
     const ctx = canvas.getContext('2d');
-    const s   = Math.min(img.naturalWidth, img.naturalHeight);
-    const sx  = (img.naturalWidth  - s) / 2;
-    const sy  = (img.naturalHeight - s) / 2;
-    ctx.drawImage(img, sx, sy, s, s, 0, 0, MASTER, MASTER);
+    const s = Math.min(img.naturalWidth, img.naturalHeight);
+    ctx.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, MASTER, MASTER);
     return canvas.toDataURL('image/jpeg', 0.92);
   }
 
-  // Apply image background to a single tile element.
-  // `val` is the tile's face value (0-based); its solved-state position
-  // determines which slice of the image it shows.
   function applyImageToTile(el, val) {
-    const r = Math.floor(val / SIZE);
-    const c = val % SIZE;
-    const totalPx = SIZE * TILE_SIZE;
+    const r = Math.floor(val / SIZE), c = val % SIZE, totalPx = SIZE * TILE_SIZE;
     el.style.backgroundImage    = `url('${imageDataUrl}')`;
     el.style.backgroundSize     = `${totalPx}px ${totalPx}px`;
     el.style.backgroundPosition = `${-c * TILE_SIZE}px ${-r * TILE_SIZE}px`;
@@ -435,32 +324,7 @@
     el.classList.remove('has-image');
   }
 
-  // ── Preset gallery ────────────────────────────────────────────
-  // All images are public domain, sourced from Wikimedia Commons.
-  // Wikimedia serves thumbnails with CORS headers, required for canvas.
-  const PRESETS = [
-    { name: 'Starry Night',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg' },
-    { name: 'The Great Wave',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg' },
-    { name: 'Sunflowers',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/1200px-Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg' },
-    { name: 'Water Lilies',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Claude_Monet_-_Water_Lilies_-_1906%2C_Ryerson.jpg/1280px-Claude_Monet_-_Water_Lilies_-_1906%2C_Ryerson.jpg' },
-    { name: 'The Kiss',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1024px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg' },
-    { name: 'Pearl Earring',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/882px-1665_Girl_with_a_Pearl_Earring.jpg' },
-    { name: 'Blue Marble',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1200px-The_Earth_seen_from_Apollo_17.jpg' },
-    { name: 'Irises',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/1280px-Irises-Vincent_van_Gogh.jpg' },
-  ];
-
-  // Wikimedia thumbnail URLs: swap the width segment to get a smaller preview
-  const thumbUrl = url => url.replace(/\/\d+px-/, '/100px-');
-
-  // Shared: apply a cropped square data URL to the board (no reshuffle)
+  // Shared: apply a cropped square data URL to the current board
   function applyLoadedImage(dataUrl) {
     imageDataUrl = dataUrl;
     showNumbers  = false;
@@ -471,31 +335,96 @@
     boardEl.classList.add('hide-numbers');
   }
 
-  function loadPreset(url, btn) {
-    messageEl.textContent = 'Loading…';
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyLoadedImage(cropToSquare(img));
-    };
-    img.onerror = () => { messageEl.textContent = 'Could not load image — try another.'; };
-    img.src = url;
+  // ── Preset gallery ────────────────────────────────────────────
+  // Images are public domain artworks and NASA photos from Wikimedia Commons,
+  // plus freely-licensed (CC) animal and flower photos.
+  // URLs use the Special:Redirect/file API so we don't need hash paths.
+  const WIKI = (file, w) =>
+    `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(file)}&width=${w}`;
+
+  const PRESETS = [
+    // Art — public domain paintings
+    { cat: 'art', name: 'Starry Night',    file: 'Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg' },
+    { cat: 'art', name: 'The Great Wave',  file: 'The_Great_Wave_off_Kanagawa.jpg' },
+    { cat: 'art', name: 'Sunflowers',      file: 'Vincent_Willem_van_Gogh,_Dutch_-_Sunflowers_-_Google_Art_Project.jpg' },
+    { cat: 'art', name: 'Water Lilies',    file: 'Claude_Monet_-_Water_Lilies_-_1906,_Ryerson.jpg' },
+    { cat: 'art', name: 'The Kiss',        file: 'Klimt_-_Der_Kuss.jpeg' },
+    { cat: 'art', name: 'Pearl Earring',   file: 'Meisje_met_de_parel.jpg' },
+    // NASA — public domain (US government works)
+    { cat: 'nasa', name: 'Blue Marble',      file: 'The_Earth_seen_from_Apollo_17.jpg' },
+    { cat: 'nasa', name: 'Earthrise',        file: 'NASA-Apollo8-Dec24-Earthrise.jpg' },
+    { cat: 'nasa', name: 'Pillars of Creation', file: 'Pillars_of_Creation_(NIRCam_Image).jpg' },
+    { cat: 'nasa', name: 'Saturn',           file: 'Saturn_from_Cassini_Orbiter_(2004-10-06).jpg' },
+    // Dogs & Cats — freely licensed photos (CC)
+    { cat: 'animals', name: 'Yellow Lab',      file: 'Labrador_Retriever_-_Yellow.JPG' },
+    { cat: 'animals', name: 'Beagle Pup',      file: 'Beagle_puppy_6_weeks.JPG' },
+    { cat: 'animals', name: 'Golden Retriever', file: 'Golden_Retriever_Hund_Dog.JPG' },
+    { cat: 'animals', name: 'Orange Tabby',    file: 'Cat_November_2010-1a.jpg' },
+    { cat: 'animals', name: 'Cat on Snow',     file: 'Felis_catus-cat_on_snow.jpg' },
+    { cat: 'animals', name: 'Blue-Eyed Tabby', file: 'Tabby_cat_with_blue_eyes-3336579.jpg' },
+    // Flowers — freely licensed photos + one painting (CC / PD)
+    { cat: 'flowers', name: 'Sunflower',        file: 'Sunflower_from_Silesia.JPG' },
+    { cat: 'flowers', name: 'Red Rose',         file: 'Small_Red_Rose.JPG' },
+    { cat: 'flowers', name: 'Cherry Blossoms',  file: 'Cherry_Blossoms_UBC_02.JPG' },
+    { cat: 'flowers', name: 'Irises',           file: 'Irises-Vincent_van_Gogh.jpg' },
+    { cat: 'flowers', name: 'Lotus',            file: 'Lotus_flower_(978659).jpg' },
+  ];
+
+  // Fetch a URL and return a same-origin blob URL — bypasses canvas CORS taint
+  async function fetchBlobUrl(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const blob = await resp.blob();
+    return URL.createObjectURL(blob);
   }
+
+  async function loadPreset(preset, btn) {
+    messageEl.textContent = 'Loading…';
+    btn.disabled = true;
+    try {
+      const blobUrl = await fetchBlobUrl(WIKI(preset.file, 1200));
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(blobUrl);
+        document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        btn.disabled = false;
+        applyLoadedImage(cropToSquare(img));
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(blobUrl);
+        btn.disabled = false;
+        messageEl.textContent = 'Could not decode image.';
+      };
+      img.src = blobUrl;
+    } catch {
+      btn.disabled = false;
+      messageEl.textContent = 'Could not load image — check network connection.';
+    }
+  }
+
+  let activeCat = 'art';
 
   function buildGallery() {
     const galleryEl = document.getElementById('gallery');
-    PRESETS.forEach(preset => {
+    galleryEl.innerHTML = '';
+    PRESETS.filter(p => p.cat === activeCat).forEach(preset => {
       const btn = document.createElement('button');
       btn.className = 'preset-btn';
       btn.title = preset.name;
 
+      // Thumbnail — displayed with <img>, no canvas, no CORS needed
       const img = document.createElement('img');
       img.className = 'preset-thumb';
-      img.src = thumbUrl(preset.url);
       img.alt = preset.name;
-      img.loading = 'lazy';
+      img.src = WIKI(preset.file, 150);
+      img.onerror = () => {
+        img.style.display = 'none';
+        const ph = document.createElement('div');
+        ph.className = 'preset-thumb broken';
+        ph.textContent = preset.name;
+        btn.insertBefore(ph, img);
+      };
 
       const label = document.createElement('span');
       label.className = 'preset-name';
@@ -503,10 +432,21 @@
 
       btn.appendChild(img);
       btn.appendChild(label);
-      btn.addEventListener('click', () => loadPreset(preset.url, btn));
+      btn.addEventListener('click', () => loadPreset(preset, btn));
       galleryEl.appendChild(btn);
     });
   }
+
+  // Category tab clicks
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.cat === activeCat) return;
+      document.querySelector('.cat-btn.active').classList.remove('active');
+      btn.classList.add('active');
+      activeCat = btn.dataset.cat;
+      buildGallery();
+    });
+  });
 
   // ── Board init ────────────────────────────────────────────────
   function initBoard() {
@@ -518,26 +458,19 @@
     for (let val = 0; val < BLANK; val++) {
       const el = document.createElement('div');
       el.className = 'tile no-anim';
-      el.style.width    = TILE_SIZE + 'px';
-      el.style.height   = TILE_SIZE + 'px';
+      el.style.width = el.style.height = TILE_SIZE + 'px';
       el.style.fontSize = FONT_SIZE;
-
-      // Wrap label text in a span so CSS can toggle visibility independently
       const label = document.createElement('span');
-      label.className   = 'tile-label';
+      label.className = 'tile-label';
       label.textContent = val + 1;
       el.appendChild(label);
-
       el.addEventListener('click', () => applyMove(tiles.indexOf(val)));
       boardEl.appendChild(el);
       tileEls.set(val, el);
-
       if (imageDataUrl) applyImageToTile(el, val);
     }
 
-    // Sync numbers-toggle state
     boardEl.classList.toggle('hide-numbers', imageDataUrl !== null && !showNumbers);
-
     placeAll();
     requestAnimationFrame(() => tileEls.forEach(el => el.classList.remove('no-anim')));
     updateMovable();
@@ -552,22 +485,18 @@
 
   function updateMovable() {
     const movable = new Set(neighbours(emptyPos()));
-    tileEls.forEach((el, val) => {
-      el.classList.toggle('movable', movable.has(tiles.indexOf(val)));
-    });
+    tileEls.forEach((el, val) => el.classList.toggle('movable', movable.has(tiles.indexOf(val))));
   }
 
   // ── New game ──────────────────────────────────────────────────
   function newGame() {
-    replaying = false;
-    animating = false;
+    replaying = false; animating = false;
     stopTimer();
     overlayEl.classList.remove('show');
     messageEl.textContent = '';
     moves = 0; seconds = 0; started = false; solved = false;
     moveHistory = [];
-    moveCountEl.textContent = '0';
-    timerEl.textContent = '0:00';
+    moveCountEl.textContent = '0'; timerEl.textContent = '0:00';
 
     do {
       tiles = Array.from({length: SIZE*SIZE}, (_, i) => i);
@@ -585,15 +514,12 @@
     if (solved || replaying || animating) return false;
     const empty = emptyPos();
     if (!neighbours(empty).includes(tilePos)) return false;
-
     if (!started) { startTimer(); started = true; }
     if (record) moveHistory.push({emptyBefore: empty, tilePos});
-
     slideToEmpty(tilePos, empty);
     playSlide();
     moves++;
     moveCountEl.textContent = moves;
-
     animating = true;
     setTimeout(() => { animating = false; if (isGoal()) onWin(); }, ANIM_MS);
     return true;
@@ -609,52 +535,40 @@
 
   // ── Win ───────────────────────────────────────────────────────
   function onWin() {
-    stopTimer();
-    solved = true;
-    playWin();
-    overlayEl.innerHTML = ''; // rebuild overlay content
-
+    stopTimer(); solved = true; playWin();
+    overlayEl.innerHTML = '';
     const title = document.createElement('div');
     title.textContent = 'Puzzle Solved!';
-    overlayEl.appendChild(title);
-
     const sub = document.createElement('div');
-    sub.className   = 'sub';
+    sub.className = 'sub';
     sub.textContent = `${moves} moves · ${fmt(seconds)}`;
+    overlayEl.appendChild(title);
     overlayEl.appendChild(sub);
-
-    // Show completed image thumbnail if in image mode
     if (imageDataUrl) {
       const img = new Image();
       img.onload = () => {
-        const cv  = document.createElement('canvas');
-        const sz  = Math.min(180, BOARD_PX * 0.4);
-        cv.width  = cv.height = sz;
+        const cv = document.createElement('canvas');
+        const sz = Math.min(180, BOARD_PX * 0.4);
+        cv.width = cv.height = sz;
         cv.getContext('2d').drawImage(img, 0, 0, sz, sz);
         overlayEl.appendChild(cv);
       };
       img.src = imageDataUrl;
     }
-
     overlayEl.classList.add('show');
   }
 
   // ── Timer ─────────────────────────────────────────────────────
-  function startTimer() {
-    timerHandle = setInterval(() => { seconds++; timerEl.textContent = fmt(seconds); }, 1000);
-  }
-  function stopTimer() { clearInterval(timerHandle); timerHandle = null; }
+  function startTimer() { timerHandle = setInterval(() => { seconds++; timerEl.textContent = fmt(seconds); }, 1000); }
+  function stopTimer()  { clearInterval(timerHandle); timerHandle = null; }
   function fmt(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
   // ── Show Solution ─────────────────────────────────────────────
   document.getElementById('btn-solve').addEventListener('click', () => {
     if (replaying || solved) return;
-    if (moveHistory.length === 0) { messageEl.textContent = 'Make at least one move first.'; return; }
-    replaying = true;
-    animating = false;
-    stopTimer();
+    if (!moveHistory.length) { messageEl.textContent = 'Make at least one move first.'; return; }
+    replaying = true; animating = false; stopTimer();
     messageEl.textContent = 'Replaying solution…';
-
     const steps = [...moveHistory].reverse().map(h => h.emptyBefore);
     let i = 0;
     function step() {
@@ -672,10 +586,9 @@
     step();
   });
 
-  // ── Shuffle button ────────────────────────────────────────────
   document.getElementById('btn-shuffle').addEventListener('click', newGame);
 
-  // ── Difficulty buttons ────────────────────────────────────────
+  // ── Difficulty ────────────────────────────────────────────────
   document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.classList.contains('active')) return;
@@ -688,10 +601,8 @@
 
   // ── Image upload ──────────────────────────────────────────────
   document.getElementById('file-input').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    e.target.value = ''; // allow re-uploading same file
-
+    const file = e.target.files[0]; if (!file) return;
+    e.target.value = '';
     const reader = new FileReader();
     reader.onload = ev => {
       const img = new Image();
@@ -704,24 +615,21 @@
     reader.readAsDataURL(file);
   });
 
-  // ── Numbers toggle ────────────────────────────────────────────
   btnNumbers.addEventListener('click', () => {
     showNumbers = !showNumbers;
     btnNumbers.textContent = showNumbers ? 'Numbers: On' : 'Numbers: Off';
     boardEl.classList.toggle('hide-numbers', !showNumbers);
   });
 
-  // ── Clear image ───────────────────────────────────────────────
   document.getElementById('btn-clear').addEventListener('click', () => {
-    imageDataUrl = null;
-    showNumbers  = true;
+    imageDataUrl = null; showNumbers = true;
     imgControlsEl.style.display = 'none';
     boardEl.classList.remove('hide-numbers');
     tileEls.forEach(el => removeImageFromTile(el));
     document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
   });
 
-  // ── Mute toggle ───────────────────────────────────────────────
+  // ── Mute ──────────────────────────────────────────────────────
   document.getElementById('btn-mute').addEventListener('click', function () {
     muted = !muted;
     this.textContent = muted ? 'Sound: Off' : 'Sound: On';
