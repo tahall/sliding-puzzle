@@ -169,6 +169,61 @@
 
     #img-controls { display: none; }   /* shown once image is loaded */
 
+    /* ── Image gallery ───────────────────────────────────────────── */
+    #gallery {
+      display: flex;
+      gap: 8px;
+      max-width: 590px;
+      overflow-x: auto;
+      padding: 2px 2px 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #2a5a90 transparent;
+    }
+    #gallery::-webkit-scrollbar { height: 4px; }
+    #gallery::-webkit-scrollbar-thumb { background: #2a5a90; border-radius: 2px; }
+
+    .preset-btn {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .preset-thumb {
+      width: 76px;
+      height: 76px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 2px solid #2a3a5a;
+      display: block;
+      background: #16213e;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .preset-btn:hover .preset-thumb {
+      border-color: #e94560;
+      box-shadow: 0 0 8px rgba(233,69,96,0.4);
+    }
+    .preset-btn.active .preset-thumb {
+      border-color: #e94560;
+      box-shadow: 0 0 10px rgba(233,69,96,0.6);
+    }
+
+    .preset-name {
+      font-size: 0.62rem;
+      color: #778;
+      text-align: center;
+      max-width: 76px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .preset-btn.active .preset-name { color: #e94560; }
+
     #message {
       font-size: 1rem; font-weight: 600;
       min-height: 1.4rem; letter-spacing: 0.5px; color: #778;
@@ -209,6 +264,9 @@
   </label>
   <button id="btn-mute"    class="ctrl">Sound: On</button>
 </div>
+
+<!-- preset image gallery — always visible -->
+<div id="gallery"></div>
 
 <!-- shown only when an image is loaded -->
 <div id="img-controls">
@@ -375,6 +433,79 @@
   function removeImageFromTile(el) {
     el.style.backgroundImage = el.style.backgroundSize = el.style.backgroundPosition = '';
     el.classList.remove('has-image');
+  }
+
+  // ── Preset gallery ────────────────────────────────────────────
+  // All images are public domain, sourced from Wikimedia Commons.
+  // Wikimedia serves thumbnails with CORS headers, required for canvas.
+  const PRESETS = [
+    { name: 'Starry Night',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg' },
+    { name: 'The Great Wave',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1200px-Tsunami_by_hokusai_19th_century.jpg' },
+    { name: 'Sunflowers',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/1200px-Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg' },
+    { name: 'Water Lilies',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Claude_Monet_-_Water_Lilies_-_1906%2C_Ryerson.jpg/1280px-Claude_Monet_-_Water_Lilies_-_1906%2C_Ryerson.jpg' },
+    { name: 'The Kiss',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1024px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg' },
+    { name: 'Pearl Earring',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/882px-1665_Girl_with_a_Pearl_Earring.jpg' },
+    { name: 'Blue Marble',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1200px-The_Earth_seen_from_Apollo_17.jpg' },
+    { name: 'Irises',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/1280px-Irises-Vincent_van_Gogh.jpg' },
+  ];
+
+  // Wikimedia thumbnail URLs: swap the width segment to get a smaller preview
+  const thumbUrl = url => url.replace(/\/\d+px-/, '/100px-');
+
+  // Shared: apply a cropped square data URL to the board (no reshuffle)
+  function applyLoadedImage(dataUrl) {
+    imageDataUrl = dataUrl;
+    showNumbers  = false;
+    btnNumbers.textContent = 'Numbers: Off';
+    imgControlsEl.style.display = 'flex';
+    messageEl.textContent = '';
+    tileEls.forEach((el, val) => applyImageToTile(el, val));
+    boardEl.classList.add('hide-numbers');
+  }
+
+  function loadPreset(url, btn) {
+    messageEl.textContent = 'Loading…';
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyLoadedImage(cropToSquare(img));
+    };
+    img.onerror = () => { messageEl.textContent = 'Could not load image — try another.'; };
+    img.src = url;
+  }
+
+  function buildGallery() {
+    const galleryEl = document.getElementById('gallery');
+    PRESETS.forEach(preset => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn';
+      btn.title = preset.name;
+
+      const img = document.createElement('img');
+      img.className = 'preset-thumb';
+      img.src = thumbUrl(preset.url);
+      img.alt = preset.name;
+      img.loading = 'lazy';
+
+      const label = document.createElement('span');
+      label.className = 'preset-name';
+      label.textContent = preset.name;
+
+      btn.appendChild(img);
+      btn.appendChild(label);
+      btn.addEventListener('click', () => loadPreset(preset.url, btn));
+      galleryEl.appendChild(btn);
+    });
   }
 
   // ── Board init ────────────────────────────────────────────────
@@ -565,14 +696,8 @@
     reader.onload = ev => {
       const img = new Image();
       img.onload = () => {
-        imageDataUrl = cropToSquare(img);
-        showNumbers  = false;             // default: hide numbers in image mode
-        btnNumbers.textContent = 'Numbers: Off';
-        imgControlsEl.style.display = 'flex';
-        messageEl.textContent = '';
-        // Re-apply to current board without reshuffling
-        tileEls.forEach((el, val) => applyImageToTile(el, val));
-        boardEl.classList.add('hide-numbers');
+        document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
+        applyLoadedImage(cropToSquare(img));
       };
       img.src = ev.target.result;
     };
@@ -593,6 +718,7 @@
     imgControlsEl.style.display = 'none';
     boardEl.classList.remove('hide-numbers');
     tileEls.forEach(el => removeImageFromTile(el));
+    document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
   });
 
   // ── Mute toggle ───────────────────────────────────────────────
@@ -618,6 +744,7 @@
 
   // ── Init ──────────────────────────────────────────────────────
   computeLayout(6);
+  buildGallery();
   newGame();
 })();
 </script>
