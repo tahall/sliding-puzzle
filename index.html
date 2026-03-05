@@ -370,36 +370,48 @@
     { cat: 'flowers', name: 'Lotus',            file: 'Lotus_flower_(978659).jpg' },
   ];
 
-  // Fetch a URL and return a same-origin blob URL — bypasses canvas CORS taint
-  async function fetchBlobUrl(url) {
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const blob = await resp.blob();
-    return URL.createObjectURL(blob);
+  // Resolve a Wikimedia filename to a real upload.wikimedia.org URL via the
+  // CORS-enabled API (origin=* makes the API respond with CORS headers).
+  // upload.wikimedia.org also has Access-Control-Allow-Origin: *, so loading
+  // the returned URL with crossOrigin='anonymous' lets us draw it to canvas.
+  async function resolveWikiUrl(file, width) {
+    const params = new URLSearchParams({
+      action: 'query', format: 'json', origin: '*',
+      titles: `File:${file}`, prop: 'imageinfo',
+      iiprop: 'url', iiurlwidth: String(width),
+    });
+    const resp = await fetch(`https://commons.wikimedia.org/w/api.php?${params}`);
+    if (!resp.ok) throw new Error(`API HTTP ${resp.status}`);
+    const data  = await resp.json();
+    const pages = data.query.pages;
+    const page  = pages[Object.keys(pages)[0]];
+    if (!page.imageinfo) throw new Error('File not found on Wikimedia Commons');
+    return page.imageinfo[0].thumburl || page.imageinfo[0].url;
   }
 
   async function loadPreset(preset, btn) {
     messageEl.textContent = 'Loading…';
     btn.disabled = true;
     try {
-      const blobUrl = await fetchBlobUrl(WIKI(preset.file, 1200));
+      const imageUrl = await resolveWikiUrl(preset.file, 1200);
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = () => {
-        URL.revokeObjectURL(blobUrl);
         document.querySelectorAll('.preset-btn.active').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         btn.disabled = false;
         applyLoadedImage(cropToSquare(img));
       };
       img.onerror = () => {
-        URL.revokeObjectURL(blobUrl);
         btn.disabled = false;
-        messageEl.textContent = 'Could not decode image.';
+        messageEl.textContent = `Could not load "${preset.name}".`;
       };
-      img.src = blobUrl;
-    } catch {
+      img.src = imageUrl;
+    } catch (err) {
       btn.disabled = false;
-      messageEl.textContent = 'Could not load image — check network connection.';
+      messageEl.textContent = err.message.includes('not found')
+        ? `"${preset.name}" not found on Wikimedia.`
+        : 'Could not load image — check network connection.';
     }
   }
 
