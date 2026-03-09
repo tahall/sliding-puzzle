@@ -20,7 +20,7 @@
       padding: 20px;
     }
 
-    h1 { font-size: 2rem; letter-spacing: 2px; color: #e94560; }
+    h1 { font-size: clamp(1.4rem, 6vw, 2rem); letter-spacing: 2px; color: #e94560; }
 
     /* ── Difficulty selector ─────────────────────────────────────── */
     #difficulty { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #2a5a90; }
@@ -112,7 +112,7 @@
     /* Scrollable thumbnail row */
     #gallery {
       display: flex; gap: 8px;
-      max-width: 590px; overflow-x: auto;
+      max-width: min(590px, calc(100vw - 40px)); overflow-x: auto;
       padding: 2px 2px 6px;
       scrollbar-width: thin; scrollbar-color: #2a5a90 transparent;
     }
@@ -198,10 +198,14 @@
 <script>
 (() => {
   // ── Layout constants ──────────────────────────────────────────
-  const BOARD_TARGET = 560;
   const GAP     = 3;
   const PADDING = 6;
   const ANIM_MS = 140;
+
+  function boardTarget() {
+    // Leave 40px for body padding (20px each side); cap at 560px
+    return Math.min(560, window.innerWidth - 40);
+  }
 
   // ── Game state ────────────────────────────────────────────────
   let SIZE, BLANK, TILE_SIZE, BOARD_PX, FONT_SIZE;
@@ -282,9 +286,24 @@
   function computeLayout(size) {
     SIZE      = size;
     BLANK     = SIZE * SIZE - 1;
-    TILE_SIZE = Math.floor((BOARD_TARGET - 2*PADDING - (SIZE-1)*GAP) / SIZE);
+    TILE_SIZE = Math.floor((boardTarget() - 2*PADDING - (SIZE-1)*GAP) / SIZE);
     BOARD_PX  = 2*PADDING + SIZE*TILE_SIZE + (SIZE-1)*GAP;
     FONT_SIZE = TILE_SIZE >= 100 ? '1.8rem' : TILE_SIZE >= 70 ? '1.3rem' : TILE_SIZE >= 55 ? '1.0rem' : '0.85rem';
+  }
+
+  // Resize board in-place without reshuffling
+  function resizeBoard() {
+    computeLayout(SIZE);
+    boardEl.style.width  = BOARD_PX + 'px';
+    boardEl.style.height = BOARD_PX + 'px';
+    tileEls.forEach((el, val) => {
+      el.classList.add('no-anim');
+      el.style.width = el.style.height = TILE_SIZE + 'px';
+      el.style.fontSize = FONT_SIZE;
+      if (imageDataUrl) applyImageToTile(el, val);
+    });
+    placeAll();
+    requestAnimationFrame(() => tileEls.forEach(el => el.classList.remove('no-anim')));
   }
 
   // ── Solvability ───────────────────────────────────────────────
@@ -660,6 +679,17 @@
     };
     const target = map[e.key];
     if (target !== undefined && target !== -1) { e.preventDefault(); applyMove(target); }
+  });
+
+  // ── Responsive resize ─────────────────────────────────────────
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const prev = BOARD_PX;
+      computeLayout(SIZE);
+      if (BOARD_PX !== prev) resizeBoard();
+    }, 120);
   });
 
   // ── Init ──────────────────────────────────────────────────────
