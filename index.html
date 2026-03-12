@@ -168,7 +168,7 @@
 
 <div id="controls">
   <button id="btn-shuffle" class="ctrl">Shuffle</button>
-  <button id="btn-solve"   class="ctrl">Show Solution</button>
+  <button id="btn-solve"   class="ctrl">Replay Solution</button>
   <label  id="btn-upload"  class="ctrl">
     Upload Image
     <input type="file" id="file-input" accept="image/*">
@@ -181,6 +181,7 @@
   <div id="cat-tabs">
     <button class="cat-btn active" data-cat="art">Art</button>
     <button class="cat-btn" data-cat="nasa">NASA</button>
+    <button class="cat-btn" data-cat="parks">Parks</button>
     <button class="cat-btn" data-cat="animals">Dogs &amp; Cats</button>
     <button class="cat-btn" data-cat="flowers">Flowers</button>
   </div>
@@ -374,6 +375,13 @@
     { cat: 'nasa', name: 'Earthrise',        file: 'NASA-Apollo8-Dec24-Earthrise.jpg' },
     { cat: 'nasa', name: 'Pillars of Creation', file: 'Pillars_of_Creation_(NIRCam_Image).jpg' },
     { cat: 'nasa', name: 'Saturn',           file: 'Saturn_from_Cassini_Orbiter_(2004-10-06).jpg' },
+    // National Parks — NPS and CC-licensed photos
+    { cat: 'parks', name: 'Grand Canyon',         file: 'Grand_Canyon_(South_Rim)_Panorama_-w.jpg' },
+    { cat: 'parks', name: 'Half Dome',            file: 'Half_dome_yosemite_nationalpark.JPG' },
+    { cat: 'parks', name: 'Grand Prismatic Spring', file: 'Grand_Prismatic_Spring_10.JPG' },
+    { cat: 'parks', name: 'Angels Landing',       file: 'Zion_angels_landing_view.jpg' },
+    { cat: 'parks', name: 'Bryce Canyon',         file: 'Hoodoos_in_the_Bryce_Canyon_National_Park.jpg' },
+    { cat: 'parks', name: 'Glacier',              file: 'Glacier_National_Park,_Going-to-the-Sun_Road.JPG' },
     // Dogs & Cats — freely licensed photos (CC)
     { cat: 'animals', name: 'Yellow Lab',      file: 'Labrador_Retriever_-_Yellow.JPG' },
     { cat: 'animals', name: 'Beagle Pup',      file: 'Beagle_puppy_6_weeks.JPG' },
@@ -696,6 +704,20 @@
   computeLayout(6);
   buildGallery();
   newGame();
+
+  // Auto-load a random preset image on startup
+  (function autoLoadRandomPreset() {
+    const preset = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+    // Switch to this preset's category tab
+    document.querySelector('.cat-btn.active').classList.remove('active');
+    document.querySelector(`.cat-btn[data-cat="${preset.cat}"]`).classList.add('active');
+    activeCat = preset.cat;
+    buildGallery();
+    // Find the matching button in the freshly-built gallery
+    const catPresets = PRESETS.filter(p => p.cat === preset.cat);
+    const btn = document.querySelectorAll('#gallery .preset-btn')[catPresets.indexOf(preset)];
+    if (btn) loadPreset(preset, btn);
+  })();
 })();
 </script>
 </body>
